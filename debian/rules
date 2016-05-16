@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+export DEB_CFLAGS_MAINT_APPEND := -Wall
+export DEB_CXXFLAGS_MAINT_APPEND := -Wall
+
+override_dh_auto_configure:
+	dh_auto_configure --verbose -- \
+		--enable-ld-version-script --enable-static
+
+override_dh_makeshlibs:
+	dh_makeshlibs -V "libksba8 (>= 1.2.0)"
+
+%:
+	dh $@ --parallel --with autoreconf

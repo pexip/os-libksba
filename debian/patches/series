@@ -1,0 +1,5 @@
+Do-not-abort-on-decoder-stack-overflow.patch
+Fix-integer-overflow-in-the-BER-decoder.patch
+Fix-encoding-of-invalid-utf-8-strings-in-dn.c.patch
+Fix-an-OOB-read-access-in-_ksba_dn_to_str.patch
+Fix-possible-read-access-beyond-the-buffer.patch
