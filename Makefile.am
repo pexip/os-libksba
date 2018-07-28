@@ -19,7 +19,6 @@
 ## Process this file with automake to produce Makefile.in
 
 ACLOCAL_AMFLAGS = -I m4 -I gl/m4
-AUTOMAKE_OPTIONS = dist-bzip2 no-dist-gzip
 
 # (A suitable gitlog-to-changelog script can be found in GnuPG master.)
 GITLOG_TO_CHANGELOG=gitlog-to-changelog
@@ -41,6 +40,20 @@ endif
 SUBDIRS = m4 gl src ${tests} doc
 
 dist-hook: gen-ChangeLog
+
+distcheck-hook:
+	set -e; ( \
+	pref="#+macro: $$(echo $(PACKAGE_NAME)|tr '-' '_')_" ;\
+	reldate="$$(date -u +%Y-%m-%d)" ;\
+        echo "$${pref}ver  $(PACKAGE_VERSION)"  ;\
+        echo "$${pref}date $${reldate}" ;\
+        list='$(DIST_ARCHIVES)'; for i in $$list; do \
+	  case "$$i" in *.tar.bz2) \
+            echo "$${pref}size $$(wc -c <$$i|awk '{print int($$1/1024)}')k" ;\
+	    echo "$${pref}sha1 $$(sha1sum <$$i|cut -d' ' -f1)" ;\
+	    echo "$${pref}sha2 $$(sha256sum <$$i|cut -d' ' -f1)" ;;\
+	  esac;\
+	done ) | tee $(distdir).swdb
 
 
 gen_start_date = 2011-12-01T00:00:00
