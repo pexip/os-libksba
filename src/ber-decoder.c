@@ -1,5 +1,5 @@
 /* ber-decoder.c - Basic Encoding Rules Decoder
- *      Copyright (C) 2001, 2004, 2006, 2012 g10 Code GmbH
+ * Copyright (C) 2001, 2004, 2006, 2012, 2015 g10 Code GmbH
  *
  * This file is part of KSBA.
  *
@@ -40,6 +40,11 @@
 #include "asn1-func.h"
 #include "ber-decoder.h"
 #include "ber-help.h"
+
+
+/* The maximum length we allow for an image, that is for a BER encoded
+ * object.  */
+#define MAX_IMAGE_LENGTH (16 * 1024 * 1024)
 
 
 struct decoder_state_item_s {
@@ -100,7 +105,7 @@ struct ber_decoder_s
   struct
   {
     int primitive;  /* current value is a primitive one */
-    int length;     /* length of the primitive one */
+    size_t length;  /* length of the primitive one */
     int nhdr;       /* length of the header */
     int tag;
     int is_endtag;
@@ -108,6 +113,23 @@ struct ber_decoder_s
   } val;
 };
 
+
+
+/* Evaluate with overflow check:  A1 + A2 > B  */
+static inline int
+sum_a1_a2_gt_b (size_t a1, size_t a2, size_t b)
+{
+  size_t sum = a1 + a2;
+  return (sum < a1 || sum > b);
+}
+
+/* Evaluate with overflow check:  A1 + A2 >= B  */
+static inline int
+sum_a1_a2_ge_b (size_t a1, size_t a2, size_t b)
+{
+  size_t sum = a1 + a2;
+  return (sum < a1 || sum >= b);
+}
 
 
 
@@ -158,26 +180,28 @@ dump_decoder_state (DECODER_STATE ds)
 }
 
 /* Push ITEM onto the stack */
-static void
+static gpg_error_t
 push_decoder_state (DECODER_STATE ds)
 {
   if (ds->idx >= ds->stacksize)
     {
-      fprintf (stderr, "ERROR: decoder stack overflow!\n");
-      abort ();
+      fprintf (stderr, "ksba: ber-decoder: stack overflow!\n");
+      return gpg_error (GPG_ERR_LIMIT_REACHED);
     }
   ds->stack[ds->idx++] = ds->cur;
+  return 0;
 }
 
-static void
+static gpg_error_t
 pop_decoder_state (DECODER_STATE ds)
 {
   if (!ds->idx)
     {
-      fprintf (stderr, "ERROR: decoder stack underflow!\n");
-      abort ();
+      fprintf (stderr, "ksba: ber-decoder: stack underflow!\n");
+      return gpg_error (GPG_ERR_INTERNAL);
     }
   ds->cur = ds->stack[--ds->idx];
+  return 0;
 }
 
 
@@ -185,7 +209,7 @@ pop_decoder_state (DECODER_STATE ds)
 static int
 set_error (BerDecoder d, AsnNode node, const char *text)
 {
-  fprintf (stderr,"ber-decoder: node `%s': %s\n",
+  fprintf (stderr,"ksba: ber-decoder: node `%s': %s\n",
            node? node->name:"?", text);
   d->last_errdesc = text;
   return gpg_error (GPG_ERR_BAD_BER);
@@ -838,15 +862,24 @@ decoder_next (BerDecoder d)
       if (!d->image.buf)
         {
           /* We need some extra bytes to store the stuff we read ahead
-             at the end of the module which is later pushed back. */
-          d->image.length = ti.length + 100;
+           * at the end of the module which is later pushed back.  We
+           * also clear the buffer because there is no guarantee that
+           * we will copy data to all bytes of the buffer: A broken
+           * ASN.1 encoding may thus lead to access of uninitialized
+           * data even if we make sure that that access is not our of
+           * bounds. */
           d->image.used = 0;
-          d->image.buf = xtrymalloc (d->image.length);
+          d->image.length = ti.length + 100;
+          if (d->image.length < ti.length)
+            return gpg_error (GPG_ERR_BAD_BER);
+          if (d->image.length > MAX_IMAGE_LENGTH)
+            return gpg_error (GPG_ERR_TOO_LARGE);
+          d->image.buf = xtrycalloc (1, d->image.length);
           if (!d->image.buf)
             return gpg_error (GPG_ERR_ENOMEM);
         }
 
-      if (ti.nhdr + d->image.used >= d->image.length)
+      if (sum_a1_a2_ge_b (ti.nhdr, d->image.used, d->image.length))
         return set_error (d, NULL, "image buffer too short to store the tag");
 
       memcpy (d->image.buf + d->image.used, ti.buf, ti.nhdr);
@@ -936,9 +969,9 @@ decoder_next (BerDecoder d)
                        && (ds->cur.nread
                            > ds->stack[ds->idx-1].length))
                     {
-                      fprintf (stderr, "  ERROR: object length field "
+                      fprintf (stderr, "ksba: ERROR: object length field "
                                "%d octects too large\n",
-                              ds->cur.nread > ds->cur.length);
+                               ds->cur.nread - ds->cur.length);
                       ds->cur.nread = ds->cur.length;
                     }
                   if ( ds->idx
@@ -948,7 +981,9 @@ decoder_next (BerDecoder d)
                                    >= ds->stack[ds->idx-1].length))))
                     {
                       int n = ds->cur.nread;
-                      pop_decoder_state (ds);
+                      err = pop_decoder_state (ds);
+                      if (err)
+                        return err;
                       ds->cur.nread += n;
                       ds->cur.went_up++;
                     }
@@ -964,7 +999,9 @@ decoder_next (BerDecoder d)
                   /* prepare for the next level */
                   ds->cur.length = ti.length;
                   ds->cur.ndef_length = ti.ndef;
-                  push_decoder_state (ds);
+                  err = push_decoder_state (ds);
+                  if (err)
+                    return err;
                   ds->cur.length = 0;
                   ds->cur.ndef_length = 0;
                   ds->cur.nread = 0;
@@ -1041,7 +1078,7 @@ _ksba_ber_decoder_dump (BerDecoder d, FILE *fp)
   int depth = 0;
   AsnNode node;
   unsigned char *buf = NULL;
-  size_t buflen = 0;;
+  size_t buflen = 0;
 
   if (!d)
     return gpg_error (GPG_ERR_INV_VALUE);
@@ -1063,9 +1100,9 @@ _ksba_ber_decoder_dump (BerDecoder d, FILE *fp)
       if (node)
         depth = distance (d->root, node);
 
-      fprintf (fp, "%4lu %4u:%*s",
+      fprintf (fp, "%4lu %4lu:%*s",
                ksba_reader_tell (d->reader) - d->val.nhdr,
-               d->val.length,
+               (unsigned long)d->val.length,
                depth*2, "");
       if (node)
         _ksba_asn_node_dump (node, fp);
@@ -1074,16 +1111,25 @@ _ksba_ber_decoder_dump (BerDecoder d, FILE *fp)
 
       if (node && d->val.primitive)
         {
-          int i, n, c;
+          size_t n;
+          int i, c;
           char *p;
 
           if (!buf || buflen < d->val.length)
             {
               xfree (buf);
+              buf = NULL;
               buflen = d->val.length + 100;
-              buf = xtrymalloc (buflen);
-              if (!buf)
-                err = gpg_error (GPG_ERR_ENOMEM);
+              if (buflen < d->val.length)
+                err = gpg_error (GPG_ERR_BAD_BER); /* Overflow */
+              else if (buflen > MAX_IMAGE_LENGTH)
+                err = gpg_error (GPG_ERR_TOO_LARGE);
+              else
+                {
+                  buf = xtrymalloc (buflen);
+                  if (!buf)
+                    err = gpg_error_from_syserror ();
+                }
             }
 
           for (n=0; !err && n < d->val.length; n++)
@@ -1102,7 +1148,7 @@ _ksba_ber_decoder_dump (BerDecoder d, FILE *fp)
               p = ksba_oid_to_str (buf, n);
               break;
             default:
-              for (i=0; i < n && i < 20; i++)
+              for (i=0; i < n && (d->debug || i < 20); i++)
                 fprintf (fp,"%02x", buf[i]);
               if (i < n)
                 fputs ("..more..", fp);
@@ -1171,8 +1217,6 @@ _ksba_ber_decoder_decode (BerDecoder d, const char *start_name,
 
   while (!(err = decoder_next (d)))
     {
-      int n, c;
-
       node = d->val.node;
       /* Fixme: USE_IMAGE is only not used with the ber-dump utility
          and thus of no big use.  We should remove the other code
@@ -1188,7 +1232,7 @@ _ksba_ber_decoder_decode (BerDecoder d, const char *start_name,
               if (node->type == TYPE_ANY)
                 node->actual_type = d->val.tag;
             }
-          if (d->image.used + d->val.length > d->image.length)
+          if (sum_a1_a2_gt_b (d->image.used, d->val.length, d->image.length))
             err = set_error(d, NULL, "TLV length too large");
           else if (d->val.primitive)
             {
@@ -1196,18 +1240,35 @@ _ksba_ber_decoder_decode (BerDecoder d, const char *start_name,
                                d->image.buf + d->image.used, d->val.length))
                 err = eof_or_error (d, 1);
               else
-                d->image.used += d->val.length;
+                {
+                  size_t sum = d->image.used + d->val.length;
+                  if (sum < d->image.used)
+                    err = gpg_error (GPG_ERR_BAD_BER);
+                  else
+                    d->image.used = sum;
+                }
             }
         }
       else if (node && d->val.primitive)
         {
+          size_t n;
+          int c;
+
           if (!buf || buflen < d->val.length)
             {
               xfree (buf);
+              buf = NULL;
               buflen = d->val.length + 100;
-              buf = xtrymalloc (buflen);
-              if (!buf)
-                err = gpg_error (GPG_ERR_ENOMEM);
+              if (buflen < d->val.length)
+                err = gpg_error (GPG_ERR_BAD_BER);
+              else if (buflen > MAX_IMAGE_LENGTH)
+                err = gpg_error (GPG_ERR_TOO_LARGE);
+              else
+                {
+                  buf = xtrymalloc (buflen);
+                  if (!buf)
+                    err = gpg_error_from_syserror ();
+                }
             }
 
           for (n=0; !err && n < d->val.length; n++)
