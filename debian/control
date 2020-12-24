@@ -2,16 +2,15 @@ Source: libksba
 Section: libs
 Priority: optional
 Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
-Uploaders: Andreas Metzler <ametzler@debian.org>, 
- Eric Dorland <eric@debian.org>, James Westby <jw+debian@jameswestby.net>,
- Peter Eisentraut <petere@debian.org>
-Build-Depends: debhelper (>= 9.20151004), libgpg-error-dev (>= 1.8),
-  dh-autoreconf, automake (>= 1:1.12)
+Uploaders: Andreas Metzler <ametzler@debian.org>,
+ Eric Dorland <eric@debian.org>, James Westby <jw+debian@jameswestby.net>
+Build-Depends: debhelper-compat (= 13), libgpg-error-dev (>= 1.8)
 Build-Depends-Indep: libgpg-error-mingw-w64-dev, mingw-w64
-Standards-Version: 3.9.8
-Vcs-Git: https://anonscm.debian.org/git/pkg-gnutls/libksba.git
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-gnutls/libksba.git
-Homepage: http://www.gnupg.org/related_software/libksba/
+Rules-Requires-Root: no
+Standards-Version: 4.5.1
+Vcs-Browser: https://salsa.debian.org/gnutls-team/libksba
+Vcs-Git: https://salsa.debian.org/gnutls-team/libksba.git
+Homepage: https://www.gnupg.org/related_software/libksba/
 
 Package: libksba-dev
 Section: libdevel
@@ -45,7 +44,6 @@ Description: X.509 and CMS support library
 
 Package: libksba-mingw-w64-dev
 Architecture: all
-Priority: extra
 Section: libdevel
 Depends: ${misc:Depends}
 Suggests: mingw-w64
