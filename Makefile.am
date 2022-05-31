@@ -19,6 +19,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ACLOCAL_AMFLAGS = -I m4 -I gl/m4
+DISTCHECK_CONFIGURE_FLAGS = --enable-doc
 
 # (A suitable gitlog-to-changelog script can be found in GnuPG master.)
 GITLOG_TO_CHANGELOG=gitlog-to-changelog
@@ -36,8 +37,13 @@ else
 tests = tests
 endif
 
+if BUILD_DOC
+doc = doc
+else
+doc =
+endif
 
-SUBDIRS = m4 gl src ${tests} doc
+SUBDIRS = m4 gl src $(tests) $(doc)
 
 dist-hook: gen-ChangeLog
 
@@ -57,7 +63,6 @@ distcheck-hook:
 
 
 gen_start_date = 2011-12-01T00:00:00
-.PHONY: gen-ChangeLog
 gen-ChangeLog:
 	if test -d $(top_srcdir)/.git; then				\
 	  (cd $(top_srcdir) &&                      			\
@@ -73,3 +78,27 @@ gen-ChangeLog:
 
 stowinstall:
 	$(MAKE) $(AM_MAKEFLAGS) install prefix=/usr/local/stow/libksba
+
+
+
+# Coverage targets
+if HAVE_GCOV
+
+clean-coverage:
+	@echo Removing old coverage results
+	-find -name '*.gcda' -print | xargs -r rm
+	-find -name '*.gcno' -print | xargs -r rm
+	-rm -rf coverage.info coveragereport
+
+coverage-html: check
+	@echo Collecting coverage data with lcov
+	$(top_srcdir)/autogen.sh --coverage $(LCOV) $(GCOV) $(abs_builddir) \
+		tests src
+	$(top_srcdir)/autogen.sh --report $(LCOV) $(GENHTML) $(abs_builddir) \
+		'*/tests/*' '*/asn1-parse.c' '*/asn1-parse.y'
+
+clean-local: clean-coverage
+
+endif # HAVE_GCOV
+
+.PHONY: gen-ChangeLog clean-coverage coverage-html

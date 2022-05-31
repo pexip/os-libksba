@@ -84,8 +84,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Defined if a `u32' is typedef'd */
-#undef HAVE_U32_TYPEDEF
+/* Define to 1 if the system has the type `u32'. */
+#undef HAVE_U32
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
@@ -103,7 +103,7 @@
    */
 #undef LT_OBJDIR
 
-/* Name of this package */
+/* Name of package */
 #undef PACKAGE
 
 /* Define to the address where bug reports for this package should be sent. */
@@ -163,7 +163,7 @@
 #endif
 
 
-/* Version of this package */
+/* Version number of package */
 #undef VERSION
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
@@ -177,6 +177,9 @@
 #  undef WORDS_BIGENDIAN
 # endif
 #endif
+
+/* Expose all libc features (__DARWIN_C_FULL). */
+#undef _DARWIN_C_SOURCE
 
 /* Define to 1 if on MINIX. */
 #undef _MINIX
