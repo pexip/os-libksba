@@ -18,14 +18,18 @@
 
 ## Process this file with automake to produce Makefile.in
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = ksba.pc
+
 asn1_modules = tmttv2.asn cms.asn
 
 buildtool_src = asn1-gentables.c gen-help.c gen-help.h
-EXTRA_DIST = ksba-config.in $(asn1_modules) ksba.m4 libksba.vers libksba.def \
-	     asn1-parse.c asn1-tables.c $(buildtool_src)
+EXTRA_DIST = ksba.h.in ksba-config.in $(asn1_modules) ksba.m4 \
+             libksba.vers libksba.def \
+	     asn1-parse.c asn1-tables.c $(buildtool_src) ksba.pc.in
 BUILT_SOURCES = asn1-parse.c asn1-tables.c
 bin_SCRIPTS = ksba-config
-include_HEADERS = ksba.h
+nodist_include_HEADERS = ksba.h
 lib_LTLIBRARIES = libksba.la
 noinst_PROGRAMS = ber-dump
 
@@ -36,7 +40,7 @@ CLEANFILES = asn1-gentables
 DISTCLEANFILES = asn1-tables.c
 
 AM_CPPFLAGS =  -I$(top_builddir)/gl -I$(top_srcdir)/gl
-AM_CFLAGS = $(GPG_ERROR_CFLAGS)
+AM_CFLAGS = $(GPG_ERROR_CFLAGS) $(COVERAGE_CFLAGS)
 
 
 if HAVE_LD_VERSION_SCRIPT
@@ -82,7 +86,8 @@ endif !HAVE_W32_SYSTEM
 
 libksba_la_LDFLAGS = $(no_undefined) $(export_symbols) $(extra_ltoptions) \
       $(libksba_version_script_cmd) -version-info \
-      @LIBKSBA_LT_CURRENT@:@LIBKSBA_LT_REVISION@:@LIBKSBA_LT_AGE@
+      @LIBKSBA_LT_CURRENT@:@LIBKSBA_LT_REVISION@:@LIBKSBA_LT_AGE@ \
+      $(COVERAGE_LDFLAGS)
 libksba_la_INCLUDES = -I$(top_srcdir)/lib
 libksba_la_DEPENDENCIES = $(srcdir)/libksba.vers $(ksba_deps)
 libksba_la_LIBADD = $(ksba_res) @LTLIBOBJS@ @GPG_ERROR_LIBS@
@@ -94,31 +99,33 @@ libksba_la_SOURCES = \
 	reader.c reader.h \
 	writer.c writer.h \
 	asn1-parse.y \
-	asn1-func.c asn1-func2.c asn1-func.h \
+	asn1-func.c asn1-func2.c asn1-func.h asn1-constants.h \
 	ber-help.c ber-help.h \
 	ber-decoder.c ber-decoder.h \
 	der-encoder.c der-encoder.h \
+	der-builder.c der-builder.h \
 	cert.c cert.h \
 	cms.c cms.h cms-parser.c \
 	crl.c crl.h \
 	certreq.c certreq.h \
 	ocsp.c ocsp.h \
 	keyinfo.c keyinfo.h \
-	oid.c name.c dn.c time.c convert.h \
+	oid.c name.c dn.c time.c convert.h stringbuf.h \
 	version.c util.c util.h shared.h \
 	sexp-parse.h \
 	asn1-tables.c
 
 ber_dump_SOURCES = ber-dump.c \
                    ber-decoder.c ber-help.c reader.c writer.c asn1-parse.c \
-                   asn1-func.c oid.c util.c
+                   asn1-func.c oid.c time.c util.c
 ber_dump_LDADD = $(GPG_ERROR_LIBS) ../gl/libgnu.la
 ber_dump_CFLAGS = $(AM_CFLAGS)
 
 asn1-parse.c : asn1-func.h gen-help.h
 
 asn1-gentables: asn1-gentables.c asn1-parse.c asn1-func.c gen-help.c gen-help.h
-	$(CC_FOR_BUILD) -I$(srcdir) -DBUILD_GENTOOLS -o $@ \
+	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) \
+	        $(CPPFLAGS_FOR_BUILD) -I$(srcdir) -DBUILD_GENTOOLS -o $@ \
 		$(srcdir)/asn1-gentables.c \
                 `test -f 'asn1-parse.c' || echo '$(srcdir)/'`asn1-parse.c  \
                 $(srcdir)/asn1-func.c      \

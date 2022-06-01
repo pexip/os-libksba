@@ -1,4 +1,4 @@
-This is ksba.info, produced by makeinfo version 5.2 from ksba.texi.
+This is ksba.info, produced by makeinfo version 6.5 from ksba.texi.
 
 INFO-DIR-SECTION GNU libraries
 START-INFO-DIR-ENTRY
@@ -8,8 +8,8 @@ END-INFO-DIR-ENTRY
 This file documents the KSBA library to access X.509 and CMS data
 structures.
 
-   This is edition 1.3.5, last updated 15 March 2013, of 'The KSBA
-Reference Manual', for Version 1.3.5.
+   This is edition 1.5.0, last updated 12 May 2020, of 'The KSBA
+Reference Manual', for Version 1.5.0.
 
    Copyright (C) 2002, 2003, 2004 g10 Code GmbH
 
@@ -25,8 +25,8 @@ File: ksba.info,  Node: Top,  Next: Introduction,  Up: (dir)
 Main Menu
 *********
 
-This is edition 1.3.5, last updated 15 March 2013, of 'The KSBA
-Reference Manual', for Version 1.3.5 of the KSBA library.
+This is edition 1.5.0, last updated 12 May 2020, of 'The KSBA Reference
+Manual', for Version 1.5.0 of the KSBA library.
 
    Copyright (C) 2002, 2003, 2004 g10 Code GmbH
 
@@ -379,7 +379,21 @@ certificate object has not yet been initialized by means of
      Figure out the the digest algorithm used for the signature and
      return its OID in dotted decimal format.  This function is most
      likely used to setup the hash context before calling
-     'ksba_cert_hash'.
+     'ksba_cert_hash'.  For some certificate types the returned OID has
+     a special meaning:
+
+     '1.2.840.113549.1.1.10'
+          This indicates the RSASSA-PSS algorithm.  The digest algorithm
+          needs to be extracted from the S-expression returned by
+          'ksba_cert_get_sig_val'.
+
+     '1.3.101.112'
+          This is the Ed25519 algorithm which does not use a separate
+          digest algorithm.  See RFC-8410.
+
+     '1.3.101.113'
+          This is the Ed448 algorithm which does not use a separate
+          digest algorithm.  See RFC-8410.
 
      The function returns 'NULL' for an error; on success a constant
      string with the OID is returned.  This string is valid as long the
@@ -660,8 +674,9 @@ mechanism for this by means of two functions:
      *Caution:* This function is definitely not thread safe because we
      don't employ any locking mechanisms.
 
- -- Function: gpg_error_t ksba_cert_get_user_data (ksba_cert_t CERT, const char *KEY,
-          void *BUFFER, size_t BUFFERLEN, size_t *DATALEN)
+ -- Function: gpg_error_t ksba_cert_get_user_data (ksba_cert_t CERT,
+          const char *KEY, void *BUFFER, size_t BUFFERLEN,
+          size_t *DATALEN)
 
      Return user data for certificate CERT stored under the string KEY.
      The caller needs to provide a suitable large BUFFER and the usable
@@ -1781,46 +1796,46 @@ Function and Data Index
 * Menu:
 
 * ksba_cert_get_authority_info_access:   Retrieving attributes.
-                                                              (line 263)
+                                                              (line 279)
 * ksba_cert_get_auth_key_id:             Retrieving attributes.
-                                                              (line 254)
+                                                              (line 270)
 * ksba_cert_get_cert_policies:           Retrieving attributes.
-                                                              (line 216)
+                                                              (line 232)
 * ksba_cert_get_crl_dist_point:          Retrieving attributes.
-                                                              (line 226)
+                                                              (line 242)
 * ksba_cert_get_digest_algo:             Retrieving attributes.
-                                                              (line  39)
+                                                              (line  41)
 * ksba_cert_get_extension:               Retrieving attributes.
-                                                              (line 164)
+                                                              (line 180)
 * ksba_cert_get_ext_key_usages:          Retrieving attributes.
-                                                              (line 210)
+                                                              (line 226)
 * ksba_cert_get_image:                   Retrieving attributes.
                                                               (line  11)
 * ksba_cert_get_issuer:                  Retrieving attributes.
-                                                              (line  57)
+                                                              (line  73)
 * ksba_cert_get_key_usage:               Retrieving attributes.
-                                                              (line 177)
+                                                              (line 193)
 * ksba_cert_get_public_key:              Retrieving attributes.
-                                                              (line 156)
+                                                              (line 172)
 * ksba_cert_get_serial:                  Retrieving attributes.
-                                                              (line  50)
+                                                              (line  66)
 * ksba_cert_get_sig_val:                 Retrieving attributes.
-                                                              (line 160)
+                                                              (line 176)
 * ksba_cert_get_subject:                 Retrieving attributes.
-                                                              (line  84)
+                                                              (line 100)
 * ksba_cert_get_subject_info_access:     Retrieving attributes.
-                                                              (line 277)
+                                                              (line 293)
 * ksba_cert_get_subj_key_id:             Retrieving attributes.
-                                                              (line 245)
+                                                              (line 261)
 * ksba_cert_get_user_data:               User data.           (line  26)
 * ksba_cert_get_validity:                Retrieving attributes.
-                                                              (line 145)
+                                                              (line 161)
 * ksba_cert_hash:                        Retrieving attributes.
-                                                              (line  24)
+                                                              (line  25)
 * ksba_cert_init_from_mem:               Creating certificates.
                                                               (line  41)
 * ksba_cert_is_ca:                       Retrieving attributes.
-                                                              (line 169)
+                                                              (line 185)
 * ksba_cert_new:                         Creating certificates.
                                                               (line   9)
 * ksba_cert_read_der:                    Creating certificates.
@@ -1843,7 +1858,7 @@ Function and Data Index
 * ksba_content_t:                        CMS Parser.          (line  61)
 * ksba_dn_teststr:                       DNs.                 (line   9)
 * ksba_isotime_t:                        Retrieving attributes.
-                                                              (line 109)
+                                                              (line 125)
 * ksba_name_enum:                        Names.               (line  17)
 * ksba_name_get_uri:                     Names.               (line  36)
 * ksba_name_release:                     Names.               (line  13)
@@ -1855,33 +1870,33 @@ Function and Data Index
 
 
 Tag Table:
-Node: Top740
-Node: Introduction2772
-Node: Getting Started3050
-Node: Features3916
-Node: Overview5007
-Node: Preparation5256
-Node: Header5739
-Node: Version Check6335
-Node: Building the source7427
-Node: Certificate Handling9271
-Node: Creating certificates10252
-Node: Retrieving attributes12713
-Node: Setting attributes26390
-Node: User data26655
-Node: CMS28565
-Node: CMS Basics29024
-Node: CMS Parser31087
-Node: CRLs35065
-Node: PKCS1035348
-Node: Utilities35609
-Node: Names36013
-Node: OIDs38325
-Node: DNs38529
-Node: Error Handling39660
-Node: Component Labels41015
-Node: Copying42578
-Node: Concept Index80105
-Node: Function and Data Index80233
+Node: Top738
+Node: Introduction2768
+Node: Getting Started3046
+Node: Features3912
+Node: Overview5003
+Node: Preparation5252
+Node: Header5735
+Node: Version Check6331
+Node: Building the source7423
+Node: Certificate Handling9267
+Node: Creating certificates10248
+Node: Retrieving attributes12709
+Node: Setting attributes26927
+Node: User data27192
+Node: CMS29112
+Node: CMS Basics29571
+Node: CMS Parser31634
+Node: CRLs35612
+Node: PKCS1035895
+Node: Utilities36156
+Node: Names36560
+Node: OIDs38872
+Node: DNs39076
+Node: Error Handling40207
+Node: Component Labels41562
+Node: Copying43125
+Node: Concept Index80652
+Node: Function and Data Index80780
 
 End Tag Table
