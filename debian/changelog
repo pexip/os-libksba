@@ -1,3 +1,11 @@
+libksba (1.5.0-3+deb11u1) bullseye-security; urgency=high
+
+  * 20_Detect-a-possible-overflow-directly-in-the-TLV-parse.patch from
+    upstream 1.6.2 release fixing a integer overflow. CVE-2022-3515
+    Closes: #1021928
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 17 Oct 2022 18:36:34 +0200
+
 libksba (1.5.0-3) unstable; urgency=medium
 
   * Add 10_Fix-a-possible-segv-in-case-of-an-unknown-CMS-object.patch from

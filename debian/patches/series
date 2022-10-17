@@ -1,2 +1,3 @@
 0001-fix-win32-linker.patch
 10_Fix-a-possible-segv-in-case-of-an-unknown-CMS-object.patch
+20_Detect-a-possible-overflow-directly-in-the-TLV-parse.patch
