@@ -1,3 +1,11 @@
+libksba (1.5.0-3+deb11u2) bullseye-security; urgency=high
+
+  * 25-Fix-an-integer-overflow-in-the-CRL-signature-parser.patch from 1.6.3
+    release: Fix an integer overflow in the CRL signature parser.
+    https://dev.gnupg.org/T6284
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 20 Dec 2022 18:22:50 +0100
+
 libksba (1.5.0-3+deb11u1) bullseye-security; urgency=high
 
   * 20_Detect-a-possible-overflow-directly-in-the-TLV-parse.patch from
