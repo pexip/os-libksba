@@ -8,8 +8,8 @@ END-INFO-DIR-ENTRY
 This file documents the KSBA library to access X.509 and CMS data
 structures.
 
-   This is edition 1.5.0, last updated 12 May 2020, of 'The KSBA
-Reference Manual', for Version 1.5.0.
+   This is edition 1.6.3, last updated 22 November 2022, of 'The KSBA
+Reference Manual', for Version 1.6.3.
 
    Copyright (C) 2002, 2003, 2004 g10 Code GmbH
 
@@ -25,8 +25,8 @@ File: ksba.info,  Node: Top,  Next: Introduction,  Up: (dir)
 Main Menu
 *********
 
-This is edition 1.5.0, last updated 12 May 2020, of 'The KSBA Reference
-Manual', for Version 1.5.0 of the KSBA library.
+This is edition 1.6.3, last updated 22 November 2022, of 'The KSBA
+Reference Manual', for Version 1.6.3 of the KSBA library.
 
    Copyright (C) 2002, 2003, 2004 g10 Code GmbH
 
@@ -228,33 +228,34 @@ which the header file is located to the compiler's include file search
 path (via the '-I' option).
 
    However, the path to the include file is determined at the time the
-source is configured.  To solve this problem, 'KSBA' ships with a small
-helper program 'ksba-config' that knows about the path to the include
-file and other configuration options.  The options that need to be added
-to the compiler invocation at compile time are output by the '--cflags'
-option of 'ksba-config'.  The following example shows how it can be used
-at the command line:
+source is configured.  To solve this problem, 'KSBA' ships with
+'ksba.pc' file, that knows about the path to the include file and other
+configuration options.  The options that need to be added to the
+compiler invocation at compile time are output by the '--cflags' option
+of 'pkg-config ksba'.  The following example shows how it can be used at
+the command line:
 
-     gcc -c foo.c `ksba-config --cflags`
+     gcc -c foo.c `pkg-config --cflags ksba`
 
-   Adding the output of 'ksba-config --cflags' to the compiler's command
-line will ensure that the compiler can find the 'ksba.h' header file.
+   Adding the output of 'pkg-config --cflags ksba' to the compiler's
+command line will ensure that the compiler can find the 'ksba.h' header
+file.
 
    A similar problem occurs when linking the program with the library.
 Again, the compiler has to find the library files.  For this to work,
 the path to the library files has to be added to the library search path
-(via the '-L' option).  For this, the option '--libs' of 'ksba-config'
-can be used.  For convenience, this option also outputs all other
+(via the '-L' option).  For this, the option '--libs' of 'pkg-config
+ksba' can be used.  For convenience, this option also outputs all other
 options that are required to link the program with the 'KSBA' libraries
 (in particular, the '-lksba' option).  The example shows how to link
 'foo.o' with the 'KSBA' libraries to a program 'foo'.
 
-     gcc -o foo foo.o `ksba-config --libs`
+     gcc -o foo foo.o `pkg-config --libs ksba`
 
    Of course you can also combine both examples to a single command by
-specifying both options to 'ksba-config':
+specifying both options to 'pkg-config ksba':
 
-     gcc -o foo foo.c `ksba-config --cflags --libs`
+     gcc -o foo foo.c `pkg-config --cflags --libs ksba`
 
 
 File: ksba.info,  Node: Certificate Handling,  Next: CMS,  Prev: Preparation,  Up: Top
@@ -1870,33 +1871,33 @@ Function and Data Index
 
 
 Tag Table:
-Node: Top738
-Node: Introduction2768
-Node: Getting Started3046
-Node: Features3912
-Node: Overview5003
-Node: Preparation5252
-Node: Header5735
-Node: Version Check6331
-Node: Building the source7423
-Node: Certificate Handling9267
-Node: Creating certificates10248
-Node: Retrieving attributes12709
-Node: Setting attributes26927
-Node: User data27192
-Node: CMS29112
-Node: CMS Basics29571
-Node: CMS Parser31634
-Node: CRLs35612
-Node: PKCS1035895
-Node: Utilities36156
-Node: Names36560
-Node: OIDs38872
-Node: DNs39076
-Node: Error Handling40207
-Node: Component Labels41562
-Node: Copying43125
-Node: Concept Index80652
-Node: Function and Data Index80780
+Node: Top743
+Node: Introduction2778
+Node: Getting Started3056
+Node: Features3922
+Node: Overview5013
+Node: Preparation5262
+Node: Header5745
+Node: Version Check6341
+Node: Building the source7433
+Node: Certificate Handling9284
+Node: Creating certificates10265
+Node: Retrieving attributes12726
+Node: Setting attributes26944
+Node: User data27209
+Node: CMS29129
+Node: CMS Basics29588
+Node: CMS Parser31651
+Node: CRLs35629
+Node: PKCS1035912
+Node: Utilities36173
+Node: Names36577
+Node: OIDs38889
+Node: DNs39093
+Node: Error Handling40224
+Node: Component Labels41579
+Node: Copying43142
+Node: Concept Index80669
+Node: Function and Data Index80797
 
 End Tag Table

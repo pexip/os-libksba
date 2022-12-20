@@ -28,7 +28,11 @@ EXTRA_DIST = ksba.h.in ksba-config.in $(asn1_modules) ksba.m4 \
              libksba.vers libksba.def \
 	     asn1-parse.c asn1-tables.c $(buildtool_src) ksba.pc.in
 BUILT_SOURCES = asn1-parse.c asn1-tables.c
+if USE_GPGRT_CONFIG
+noinst_SCRIPTS = ksba-config
+else
 bin_SCRIPTS = ksba-config
+endif
 nodist_include_HEADERS = ksba.h
 lib_LTLIBRARIES = libksba.la
 noinst_PROGRAMS = ber-dump
@@ -65,13 +69,12 @@ no_undefined = -no-undefined
 export_symbols = -export-symbols $(srcdir)/libksba.def
 extra_ltoptions = -XCClinker -static-libgcc
 
-install-def-file:
-	$(INSTALL) $(srcdir)/libksba.def $(DESTDIR)$(libdir)/libksba.def
-
 uninstall-def-file:
 	-rm $(DESTDIR)$(libdir)/libksba.def
 
 ksba_deps = $(ksba_res) libksba.def
+ksbadefdir = $(libdir)
+ksbadef_DATA = libksba.def
 
 else !HAVE_W32_SYSTEM
 ksba_res =
@@ -79,7 +82,6 @@ no_undefined =
 export_symbols =
 extra_ltoptions =
 ksba_deps =
-install-def-file:
 uninstall-def-file:
 endif !HAVE_W32_SYSTEM
 
@@ -123,7 +125,8 @@ ber_dump_CFLAGS = $(AM_CFLAGS)
 
 asn1-parse.c : asn1-func.h gen-help.h
 
-asn1-gentables: asn1-gentables.c asn1-parse.c asn1-func.c gen-help.c gen-help.h
+asn1-gentables$(EXEEXT_FOR_BUILD): asn1-gentables.c asn1-parse.c asn1-func.c \
+ gen-help.c gen-help.h
 	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) \
 	        $(CPPFLAGS_FOR_BUILD) -I$(srcdir) -DBUILD_GENTOOLS -o $@ \
 		$(srcdir)/asn1-gentables.c \
@@ -131,12 +134,10 @@ asn1-gentables: asn1-gentables.c asn1-parse.c asn1-func.c gen-help.c gen-help.h
                 $(srcdir)/asn1-func.c      \
                 $(srcdir)/gen-help.c
 
-asn1-tables.c : $(asn1_modules) asn1-gentables
+asn1-tables.c : $(asn1_modules) asn1-gentables$(EXEEXT_FOR_BUILD)
 	@set -e; list=""; \
 	  for file in $(asn1_modules); do list="$$list $(srcdir)/$$file";done;\
-	  ./asn1-gentables $$list > asn1-tables.c
+	  ./asn1-gentables$(EXEEXT_FOR_BUILD) $$list > asn1-tables.c
 
-
-install-data-local: install-def-file
 
 uninstall-local: uninstall-def-file

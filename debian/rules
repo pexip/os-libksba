@@ -15,7 +15,7 @@ override_dh_auto_configure:
 
 ### "arch-independent" Windows builds: ###
 
-WIN_FLAGS=LDFLAGS="-Xlinker --no-insert-timestamp" CFLAGS="-g -Os" CPPFLAGS=
+WIN_FLAGS=LDFLAGS="-Xlinker --no-insert-timestamp" CFLAGS="-g -Os -ffile-prefix-map=$(CURDIR)=." CPPFLAGS=
 
 override_dh_auto_build-indep:
 	for cpu in i686 x86_64; do \

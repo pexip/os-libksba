@@ -18,7 +18,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 # Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.61])
+AC_PREREQ([2.69])
 min_automake_version="1.14"
 
 
@@ -29,8 +29,8 @@ min_automake_version="1.14"
 # for the LT versions.
 m4_define([mym4_package],[libksba])
 m4_define([mym4_major], [1])
-m4_define([mym4_minor], [5])
-m4_define([mym4_micro], [0])
+m4_define([mym4_minor], [6])
+m4_define([mym4_micro], [3])
 
 # Below is m4 magic to extract and compute the git revision number,
 # the decimalized short revision number, a beta version string and a
@@ -50,9 +50,9 @@ AC_INIT([mym4_package],[mym4_version],[https://bugs.gnupg.org])
 #   (Interfaces added:      CURRENT++, AGE++, REVISION=0)
 #   (No interfaces changed:                   REVISION++)
 # Please remember to document interface changes in the NEWS file.
-LIBKSBA_LT_CURRENT=21
-LIBKSBA_LT_AGE=13
-LIBKSBA_LT_REVISION=0
+LIBKSBA_LT_CURRENT=22
+LIBKSBA_LT_AGE=14
+LIBKSBA_LT_REVISION=3
 #-------------------
 # If the API is changed in an incompatible way: increment the next counter.
 KSBA_CONFIG_API_VERSION=1
@@ -112,6 +112,8 @@ LT_LANG([Windows Resource])
 
 AM_MAINTAINER_MODE
 
+# We need to compile and run a program on the build machine.
+AX_CC_FOR_BUILD
 
 AC_SUBST(LIBKSBA_LT_CURRENT)
 AC_SUBST(LIBKSBA_LT_AGE)
@@ -257,7 +259,7 @@ case "${host}" in
       have_w32_system=yes
       ;;
      *-apple-darwin*)
-      AC_DEFINE(_DARWIN_C_SOURCE, 900000L,
+      AC_DEFINE(_DARWIN_C_SOURCE, 1,
                 Expose all libc features (__DARWIN_C_FULL).)
       ;;
     *)
@@ -389,10 +391,10 @@ fi
 AC_DEFINE(GPG_ERR_SOURCE_DEFAULT, GPG_ERR_SOURCE_KSBA,
           [The default error source for libksba.])
 
+AM_CONDITIONAL(USE_GPGRT_CONFIG, [test -n "$GPGRT_CONFIG" \
+                                  -a "$ac_cv_path_GPG_ERROR_CONFIG" = no])
 
 # Checks for header files.
-AC_HEADER_STDC
-AC_CHECK_HEADERS([string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -405,7 +407,7 @@ AC_CHECK_TYPES([u32])
 
 
 # Checks for library functions.
-AC_CHECK_FUNCS([memmove strchr strtol strtoul stpcpy gmtime_r getenv])
+AC_CHECK_FUNCS([stpcpy gmtime_r getenv])
 
 
 # GNUlib checks
