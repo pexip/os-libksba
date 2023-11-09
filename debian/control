@@ -12,7 +12,7 @@ Standards-Version: 4.5.1
 Vcs-Browser: https://salsa.debian.org/gnutls-team/libksba
 Vcs-Git: https://salsa.debian.org/gnutls-team/libksba.git
 Homepage: https://www.gnupg.org/related_software/libksba/
-XS-Pexip-Upstream: http://deb.debian.org/debian/ bullseye
+XS-Pexip-Upstream: http://deb.debian.org/debian/ bookworm
 
 Package: libksba-dev
 Section: libdevel
