@@ -29,6 +29,8 @@
  */
 
 /* References:
+ * RFC-5083 := CMS - Authenticated-Enveloped-Data
+ * RFC-5084 := CMS - AES-GCM
  * RFC-5652 := Cryptographic Message Syntax (CMS) (aka STD0070)
  * SPHINX   := CMS profile developed by the German BSI.
  *             (see also https://lwn.net/2001/1011/a/german-smime.php3)
@@ -52,7 +54,7 @@
 #include "sexp-parse.h"
 #include "cert.h"
 #include "der-builder.h"
-
+#include "stringbuf.h"
 
 static gpg_error_t ct_parse_data (ksba_cms_t cms);
 static gpg_error_t ct_parse_signed_data (ksba_cms_t cms);
@@ -76,6 +78,8 @@ static struct {
   {  "1.2.840.113549.1.7.2", KSBA_CT_SIGNED_DATA,
      ct_parse_signed_data   , ct_build_signed_data    },
   {  "1.2.840.113549.1.7.3", KSBA_CT_ENVELOPED_DATA,
+     ct_parse_enveloped_data, ct_build_enveloped_data },
+  {  "1.2.840.113549.1.9.16.1.23", KSBA_CT_AUTHENVELOPED_DATA,
      ct_parse_enveloped_data, ct_build_enveloped_data },
   {  "1.2.840.113549.1.7.5", KSBA_CT_DIGESTED_DATA,
      ct_parse_digested_data , ct_build_digested_data  },
@@ -603,7 +607,8 @@ ksba_cms_release (ksba_cms_t cms)
   xfree (cms->inner_cont_oid);
   xfree (cms->encr_algo_oid);
   xfree (cms->encr_iv);
-  xfree (cms->data.digest);
+  xfree (cms->authdata.mac);
+  xfree (cms->authdata.attr);
   while (cms->signer_info)
     {
       struct signer_info_s *tmp = cms->signer_info->next;
@@ -770,7 +775,7 @@ ksba_cms_get_content_oid (ksba_cms_t cms, int what)
 
 
 /* Copy the initialization vector into iv and its len into ivlen.
-   The caller should provide a suitable large buffer */
+   The caller should proncrvide a suitable large buffer */
 gpg_error_t
 ksba_cms_get_content_enc_iv (ksba_cms_t cms, void *iv,
                              size_t maxivlen, size_t *ivlen)
@@ -789,7 +794,7 @@ ksba_cms_get_content_enc_iv (ksba_cms_t cms, void *iv,
 
 /**
  * ksba_cert_get_digest_algo_list:
- * @cert: Initialized certificate object
+ * @cms: CMS object
  * @idx: enumerator
  *
  * Figure out the the digest algorithm used for the signature and
@@ -827,7 +832,7 @@ ksba_cms_get_digest_algo_list (ksba_cms_t cms, int idx)
  *
  * Return value: 0 on success or an error code.  An error code of -1
  * is returned to indicate that there is no issuer with that idx,
- * GPG_ERR_No_Data is returned to indicate that there is no issuer at
+ * GPG_ERR_NO_DATA is returned to indicate that there is no issuer at
  * all.
  **/
 gpg_error_t
@@ -897,6 +902,8 @@ ksba_cms_get_issuer_serial (ksba_cms_t cms, int idx,
                          "..rid.issuerAndSerialNumber.serialNumber");
         }
       else if (!strcmp (n->name, "kekri"))
+        return gpg_error (GPG_ERR_UNSUPPORTED_CMS_OBJ);
+      else if (!strcmp (n->name, "pwri"))
         return gpg_error (GPG_ERR_UNSUPPORTED_CMS_OBJ);
       else
         return gpg_error (GPG_ERR_INV_CMS_OBJ);
@@ -1030,8 +1037,9 @@ ksba_cms_get_cert (ksba_cms_t cms, int idx)
 
 
 /*
-   Return the extension attribute messageDigest
-*/
+ * Return the extension attribute messageDigest
+ * or for authenvelopeddata the MAC.
+ */
 gpg_error_t
 ksba_cms_get_message_digest (ksba_cms_t cms, int idx,
                              char **r_digest, size_t *r_digest_len)
@@ -1041,6 +1049,39 @@ ksba_cms_get_message_digest (ksba_cms_t cms, int idx,
 
   if (!cms || !r_digest || !r_digest_len)
     return gpg_error (GPG_ERR_INV_VALUE);
+
+  /* Hack to return the MAC/authtag value or the authAttr.  */
+  if (cms->content.ct == KSBA_CT_AUTHENVELOPED_DATA)
+    {
+      if (!idx) /* Return authtag.  */
+        {
+          if (!cms->authdata.mac || !cms->authdata.mac_len)
+            return gpg_error (GPG_ERR_NO_DATA);
+
+          *r_digest = xtrymalloc (cms->authdata.mac_len);
+          if (!*r_digest)
+            return gpg_error_from_syserror ();
+          memcpy (*r_digest, cms->authdata.mac, cms->authdata.mac_len);
+          *r_digest_len = cms->authdata.mac_len;
+        }
+      else if (idx == 1) /* Return authAttr.  */
+        {
+          if (!cms->authdata.attr || !cms->authdata.attr_len)
+            return gpg_error (GPG_ERR_NO_DATA);
+
+          *r_digest = xtrymalloc (cms->authdata.attr_len);
+          if (!*r_digest)
+            return gpg_error_from_syserror ();
+          memcpy (*r_digest, cms->authdata.attr, cms->authdata.attr_len);
+          *r_digest_len = cms->authdata.attr_len;
+        }
+      else
+        return gpg_error (GPG_ERR_INV_INDEX);
+
+      return 0;
+    }
+
+
   if (!cms->signer_info)
     return gpg_error (GPG_ERR_NO_DATA);
   if (idx < 0)
@@ -1383,12 +1424,17 @@ ksba_cms_get_enc_val (ksba_cms_t cms, int idx)
 {
   AsnNode root, n, n2;
   gpg_error_t err;
-  ksba_sexp_t string;
+  ksba_sexp_t string = NULL;
   struct value_tree_s *vt;
   char *keyencralgo = NULL; /* Key encryption algo.  */
   char *parm = NULL;        /* Helper to get the parms of kencralgo.  */
   size_t parmlen;
+  char *parm2 = NULL;
+  size_t parm2len;
+  char *parm3 = NULL;
+  size_t parm3len;
   char *keywrapalgo = NULL; /* Key wrap algo.  */
+  char *keyderivealgo = NULL; /* Key derive algo.  */
   struct tag_info ti;
   const unsigned char *der;
   size_t derlen;
@@ -1482,15 +1528,118 @@ ksba_cms_get_enc_val (ksba_cms_t cms, int idx)
       /* gpgrt_log_debug ("%s: encryptedKey:\n", __func__); */
       /* dbg_print_sexp (string); */
     }
-  else if (!strcmp (n->name, "kekri"))
+  else if (!strcmp (root->name, "kekri"))
     return NULL; /*GPG_ERR_UNSUPPORTED_CMS_OBJ*/
+  else if (!strcmp (root->name, "pwri"))
+    {
+      /* _ksba_asn_node_dump_all (root, stderr); */
+
+      n = _ksba_asn_find_node (root, "pwri..keyEncryptionAlgorithm");
+      if (!n || n->off == -1)
+        {
+          err = gpg_error (GPG_ERR_INV_KEYINFO);
+          goto leave;
+        }
+      err = _ksba_parse_algorithm_identifier2 (vt->image + n->off,
+                                               n->nhdr + n->len, NULL,
+                                               &keyencralgo, &parm, &parmlen);
+      if (err)
+        goto leave;
+      if (strcmp (keyencralgo, "1.2.840.113549.1.9.16.3.9"))
+        {
+          /* pwri requires this and only this OID.  */
+          err = gpg_error (GPG_ERR_INV_CMS_OBJ);
+          goto leave;
+        }
+      if (!parm)
+        {
+          err = gpg_error (GPG_ERR_INV_KEYINFO);
+          goto leave;
+        }
+      /* gpgrt_log_printhex (parm, parmlen, "parms"); */
+      err = _ksba_parse_algorithm_identifier2 (parm, parmlen, NULL,
+                                               &keywrapalgo, &parm2, &parm2len);
+      if (err)
+        goto leave;
+
+      /* gpgrt_log_debug ("%s: keywrapalgo='%s'\n", __func__, keywrapalgo); */
+      /* gpgrt_log_printhex (parm2, parm2len, "parm:"); */
+
+      n = _ksba_asn_find_node (root, "pwri..keyDerivationAlgorithm");
+      if (!n || n->off == -1)
+        {
+          /* Not found but that is okay becuase it is optional.  */
+        }
+      else
+        {
+          err = _ksba_parse_algorithm_identifier3 (vt->image + n->off,
+                                                   n->nhdr + n->len, 0xa0, NULL,
+                                                   &keyderivealgo,
+                                                   &parm3, &parm3len, NULL);
+          if (err)
+            goto leave;
+        }
+
+      n = _ksba_asn_find_node (root, "pwri..encryptedKey");
+      if (!n || n->off == -1)
+        {
+          err = gpg_error (GPG_ERR_INV_KEYINFO);
+          goto leave;
+        }
+      der = vt->image + n->off;
+      derlen = n->nhdr + n->len;
+      err = parse_octet_string (&der, &derlen, &ti);
+      if (err)
+        goto leave;
+      derlen = ti.length;
+      /* gpgrt_log_printhex (der, derlen, "encryptedKey:"); */
+
+      /* Build the s-expression:
+       *  (enc-val
+       *    (pwri
+       *      (derive-algo <oid>) --| both are optional
+       *      (derive-parm <der>) --|
+       *      (encr-algo <oid>)
+       *      (encr-parm <iv>)
+       *      (encr-key <key>)))  -- this is the encrypted session key
+       */
+      {
+        struct stringbuf sb;
+
+        init_stringbuf (&sb, 200);
+        put_stringbuf (&sb, "(7:enc-val(4:pwri");
+        if (keyderivealgo && parm3)
+          {
+            put_stringbuf (&sb, "(11:derive-algo");
+            put_stringbuf_sexp (&sb, keyderivealgo);
+            put_stringbuf (&sb, ")(11:derive-parm");
+            put_stringbuf_mem_sexp (&sb, parm3, parm3len);
+            put_stringbuf (&sb, ")");
+          }
+        put_stringbuf (&sb, "(9:encr-algo");
+        put_stringbuf_sexp (&sb, keywrapalgo);
+        put_stringbuf (&sb, ")(9:encr-parm");
+        put_stringbuf_mem_sexp (&sb, parm2, parm2len);
+        put_stringbuf (&sb, ")(8:encr-key");
+        put_stringbuf_mem_sexp (&sb, der, derlen);
+        put_stringbuf (&sb, ")))");
+
+        string = get_stringbuf (&sb);
+        if (!string)
+          err = gpg_error_from_syserror ();
+      }
+
+    }
   else
     return NULL; /*GPG_ERR_INV_CMS_OBJ*/
 
  leave:
   xfree (keyencralgo);
   xfree (keywrapalgo);
+  xfree (keyderivealgo);
   xfree (parm);
+  xfree (parm2);
+  xfree (parm3);
   if (err)
     {
       /* gpgrt_log_debug ("%s: error: %s\n", __func__, gpg_strerror (err)); */
@@ -2340,7 +2489,7 @@ ct_parse_signed_data (ksba_cms_t cms)
   /* Calculate new stop reason */
   if (state == sSTART)
     {
-      if (cms->detached_data && !cms->data.digest)
+      if (cms->detached_data)
         { /* We use this stop reason to inform the caller about a
              detached signatures.  Actually there is no need for him
              to hash the data now, he can do this also later. */

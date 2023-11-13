@@ -1,30 +1,110 @@
+libksba (1.6.3-2) unstable; urgency=high
+
+  [ Debian Janitor ]
+  * merge_requests/6:
+    Apply hints suggested by the multi-arch hinter.
+      libksba-dev: Add Multi-Arch: same. This fixes: libksba-dev could be
+      marked Multi-Arch: same. (ma-same)
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 20 Dec 2022 17:56:30 +0100
+
+libksba (1.6.3-1) unstable; urgency=high
+
+  * New upstream version:
+    + Fixes another integer overflow in the CRL parser.
+      https://dev.gnupg.org/T6284
+    + Drop superfluous patches
+      28-01-build-Prefer-gpgrt-config-when-available.patch and
+      28-03-doc-Update-description-about-pkg-config.patch.
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 20 Dec 2022 17:46:06 +0100
+
+libksba (1.6.2-4) unstable; urgency=medium
+
+  * Pull two fixes from upstream GIT:
+    + 28-01-build-Prefer-gpgrt-config-when-available.patch Prefer gpgrt-config
+      ksba when gpgrt-config is available.
+    + 28-03-doc-Update-description-about-pkg-config.patch: Update docs to
+      reflect that ksba-config has been superseded by pkg-config.
+  * Add b-d on texinfo.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 19 Nov 2022 18:18:38 +0100
+
+libksba (1.6.2-3) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster (oldstable):
+    + Build-Depends: Drop versioned constraint on libgpg-error-dev.
+
+  [ Andreas Metzler ]
+  * libgpg-error 1.46 does not ship gpg-error-config, which in turn stops
+    installation of ksba-config (if gpgrt-config is available). Stop trying to
+    install it (Closes: #1022345) and simply version b-d on libgpg-error-dev
+    (>= 1.46) instead of unnecessarily complicating the build.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 23 Oct 2022 15:48:30 +0200
+
+libksba (1.6.2-2) unstable; urgency=low
+
+  * Duplicate lintian override, since ftp-master runs stable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 08 Oct 2022 14:45:12 +0200
+
+libksba (1.6.2-1) unstable; urgency=low
+
+  * Apply multi-arch hints.- libksba-mingw-w64-dev: Add Multi-Arch: foreign.
+    (From Debian Janitor)
+  * New upstream version.
+    + Drop 0010-build-Use-automake-primitives-to-install-libksba.def.patch.
+    + Bump private symbol version dependency.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 08 Oct 2022 14:05:31 +0200
+
+libksba (1.6.0-3) unstable; urgency=medium
+
+  * Also build mingw with -ffile-prefix-map=$(CURDIR)=. for reproducibility.
+    (Thanks, Vagrant Cascadian!) Closes: #1003997
+  * Run "wrap-and-sort -ast".
+  * 25_norevisionfromgit.diff: Stop trying to pull version info from GIT when
+    autoconf is run, resulting in a "-unknown" version suffix.
+    Closes: #1014149
+  * Update lintian override.
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 12 Jul 2022 14:42:35 +0200
+
+libksba (1.6.0-2) unstable; urgency=medium
+
+  * Upload to unstable.
+  * 0010-build-Use-automake-primitives-to-install-libksba.def.patch Fix
+    parallel build error on mingw.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 04 Sep 2021 14:13:25 +0200
+
+libksba (1.6.0-1) experimental; urgency=low
+
+  * New upstream version.
+    + Update symbol file (ksba_content_type_t enum extended).
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 20 Jun 2021 14:43:10 +0200
+
+libksba (1.5.1-1) experimental; urgency=medium
+
+  * New upstream version.
+    + Drop 10_Fix-a-possible-segv-in-case-of-an-unknown-CMS-object.patch.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 02 May 2021 11:07:38 +0200
+
 libksba (1.5.0-3+deb11u2pexip2) pexip; urgency=medium
 
   * New upstream release.
 
  -- Steve McIntyre <steve.mcintyre@pexip.com>  Mon, 09 Oct 2022 11:16:03 +0000
 
-libksba (1.5.0-3+deb11u2) bullseye-security; urgency=high
-
-  * 25-Fix-an-integer-overflow-in-the-CRL-signature-parser.patch from 1.6.3
-    release: Fix an integer overflow in the CRL signature parser.
-    https://dev.gnupg.org/T6284
-
- -- Andreas Metzler <ametzler@debian.org>  Tue, 20 Dec 2022 18:22:50 +0100
-
 libksba (1.5.0-3+deb11u1pexip1) pexip; urgency=medium
 
   * New upstream release.
 
  -- Mark Hymers <mark.hymers@pexip.com>  Wed, 19 Oct 2022 16:09:41 +0100
-
-libksba (1.5.0-3+deb11u1) bullseye-security; urgency=high
-
-  * 20_Detect-a-possible-overflow-directly-in-the-TLV-parse.patch from
-    upstream 1.6.2 release fixing a integer overflow. CVE-2022-3515
-    Closes: #1021928
-
- -- Andreas Metzler <ametzler@debian.org>  Mon, 17 Oct 2022 18:36:34 +0200
 
 libksba (1.5.0-3pexip3) pexip-bullseye; urgency=medium
 

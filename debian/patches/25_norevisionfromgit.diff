@@ -1,0 +1,21 @@
+Description: Do not pull revision info from GIT
+ Stop trying to pull version info from GIT when autoconf is run.
+Author: Andreas Metzler <ametzler@debian.org>
+Bug-Debian: https://bugs.debian.org/1014149
+Origin: vendor
+Forwarded: no
+Last-Update: 2022-07-12
+
+--- libksba-1.6.0.orig/autogen.sh
++++ libksba-1.6.0/autogen.sh
+@@ -236,8 +236,8 @@ if [ "$myhost" = "find-version" ]; then
+       rvd=$((0x$(echo ${rev} | head -c 4)))
+     else
+       ingit=no
+-      beta=yes
+-      tmp="-unknown"
++      beta=no
++      tmp=""
+       rev="0000000"
+       rvd="0"
+     fi

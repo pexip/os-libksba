@@ -3,4 +3,3 @@ usr/lib/*/lib*.a
 usr/lib/*/lib*.so
 usr/lib/*/pkgconfig
 usr/share/aclocal/ksba.m4
-usr/bin/ksba-config
