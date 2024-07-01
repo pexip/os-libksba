@@ -14,7 +14,7 @@ Build-Depends-Indep:
  libgpg-error-mingw-w64-dev,
  mingw-w64,
 Rules-Requires-Root: no
-Standards-Version: 4.6.1
+Standards-Version: 4.6.2
 Vcs-Browser: https://salsa.debian.org/gnutls-team/libksba
 Vcs-Git: https://salsa.debian.org/gnutls-team/libksba.git
 Homepage: https://www.gnupg.org/related_software/libksba/
@@ -25,8 +25,6 @@ Architecture: any
 Depends:
  libksba8 (= ${binary:Version}),
  ${misc:Depends},
-Replaces:
- libksba0,
 Multi-Arch: same
 Description: X.509 and CMS support library - development files
  KSBA (pronounced Kasbah) is a library to make X.509 certificates as

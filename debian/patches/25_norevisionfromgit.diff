@@ -4,12 +4,14 @@ Author: Andreas Metzler <ametzler@debian.org>
 Bug-Debian: https://bugs.debian.org/1014149
 Origin: vendor
 Forwarded: no
-Last-Update: 2022-07-12
+Last-Update: 2027-06-29
 
---- libksba-1.6.0.orig/autogen.sh
-+++ libksba-1.6.0/autogen.sh
-@@ -236,8 +236,8 @@ if [ "$myhost" = "find-version" ]; then
-       rvd=$((0x$(echo ${rev} | head -c 4)))
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -267,12 +267,12 @@ if [ "$myhost" = "find-version" ]; then
+       [ -n "$tmp" ] && beta=yes
+       rev=$(git rev-parse --short HEAD | tr -d '\n\r')
+       rvd=$((0x$(echo ${rev} | dd bs=1 count=4 2>/dev/null)))
      else
        ingit=no
 -      beta=yes
@@ -19,3 +21,5 @@ Last-Update: 2022-07-12
        rev="0000000"
        rvd="0"
      fi
+ 
+     echo "$package-$vers$tmp:$beta:$ingit:$vers$tmp:$vers:$tmp:$rev:$rvd:"
