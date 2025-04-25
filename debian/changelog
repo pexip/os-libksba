@@ -1,3 +1,48 @@
+libksba (1.6.7-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 01 Jul 2024 18:33:40 +0200
+
+libksba (1.6.7-1) experimental; urgency=medium
+
+  * New upstream version.
+    + Unfuzz 25_norevisionfromgit.diff.
+    + Update copyright info.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 29 Jun 2024 10:54:51 +0200
+
+libksba (1.6.6-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 03 Mar 2024 10:43:46 +0100
+
+libksba (1.6.5-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 10 Dec 2023 13:45:31 +0100
+
+libksba (1.6.5-1) experimental; urgency=medium
+
+  * Drop ancient (2004) unversioned Replaces against libksba0.
+  * New upstream version.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 02 Jul 2023 16:08:58 +0200
+
+libksba (1.6.4-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 30 Jun 2023 18:08:39 +0200
+
+libksba (1.6.4-1) experimental; urgency=medium
+
+  * New upstream version.
+
+ -- Andreas Metzler <ametzler@debian.org>  Fri, 23 Jun 2023 18:46:29 +0200
+
 libksba (1.6.3-2+pexip24u3) pexip-bookworm; urgency=medium
 
   * New versioning scheme
@@ -30,7 +75,7 @@ libksba (1.6.3-1) unstable; urgency=high
 
   * New upstream version:
     + Fixes another integer overflow in the CRL parser.
-      https://dev.gnupg.org/T6284
+      https://dev.gnupg.org/T6284 CVE-2022-47629
     + Drop superfluous patches
       28-01-build-Prefer-gpgrt-config-when-available.patch and
       28-03-doc-Update-description-about-pkg-config.patch.

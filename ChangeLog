@@ -1,3 +1,125 @@
+2024-06-21  Werner Koch  <wk@gnupg.org>
+
+	Release 1.6.7.
+	+ commit b14e68b97df754b2bb7a90bb904d143d8e896afb
+
+
+	Allow for an empty Subject in certs.
+	+ commit f2e2f320c9de969e4e29861788ba590a03a0f4d8
+	* src/ber-decoder.c (match_der): Add hack for an empty subject.
+
+2024-06-14  NIIBE Yutaka  <gniibe@fsij.org>
+
+	Update gpg-error.m4.
+	+ commit f43a21b2c53ed0a95a5ad6572549eaa4123146f5
+
+
+2024-06-13  NIIBE Yutaka  <gniibe@fsij.org>
+
+	Apply spell fixes from GnuPG.
+	+ commit 364e67effbf47c58550c3e3eda13d783fd25ffc0
+	* src/ksba.m4: Fix from GnuPG.
+
+	m4: Update gpg-error.m4 from gpg-error master.
+	+ commit f63a9c36505210fb5696849b13170020c0f2752f
+	* m4/gpg-error.m4: Update.
+	* m4/libgcrypt.m4: Remove, we don't use libgcrypt.
+
+	ksba.m4: Fix setting/using GPG_ERROR_CONFIG.
+	+ commit 95dda84002f6e23f2770cdf63921f0bac1459d76
+	ksba.m4 (_AM_PATH_GPGRT_CONFIG): Don't set GPG_ERROR_CONFIG and
+	gpg_error_config_version.
+
+2024-05-14  NIIBE Yutaka  <gniibe@fsij.org>
+
+	Fix the previous commit.
+	+ commit b02b0bea7d62a352a21678a247bcb20b5a9fbf39
+
+
+	m4: Include _AM_PATH_GPGRT_CONFIG definition.
+	+ commit c910b8b136b89b134632ce1f317d856790b93fd3
+	* src/ksba.m4: Find gpgrt-config.
+
+2024-05-08  NIIBE Yutaka  <gniibe@fsij.org>
+
+	Use unsigned int for 1-bit flags.
+	+ commit a7aab2553d316eaa484e76167151157d7923a60d
+	* src/asn1-func.h (struct node_flag_s): Use unsigned int for
+	bit fields.
+
+2024-02-23  Werner Koch  <wk@gnupg.org>
+
+	Release 1.6.6.
+	+ commit 3a4382259c3c6e7ef38cd33626fe2c1da282f816
+
+
+2024-02-14  Jakub Jelen  <jjelen@redhat.com>
+
+	der-builder: Fix possible uninitialized variable.
+	+ commit 75e94db38ccd9ed166b40fb2d8aaed7c094cff69
+	* src/der-builder.c (_ksba_der_builder_get): Initialize ERR.
+
+2023-11-16  Werner Koch  <wk@gnupg.org>
+
+	Release 1.6.5.
+	+ commit 7b3e4785e54280d1a13c5bc839bdc6722d898ac7
+
+
+2023-11-14  Werner Koch  <wk@gnupg.org>
+
+	Add Brainpool curve detection using parameters with compressed BP.
+	+ commit eb23f853f178f8d381254e2cb03c0ebff57828d6
+	* src/keyinfo.c (ecdomainparm_to_name): Add variants for Brainpool.
+
+2023-11-01  NIIBE Yutaka  <gniibe@fsij.org>
+
+	build: Remove HAVE_W32CE_SYSTEM.
+	+ commit bce1c52b260da063c6198fe270cd46baf1368d9e
+	* configure.ac (HAVE_W32CE_SYSTEM): Remove.
+
+2023-09-01  NIIBE Yutaka  <gniibe@fsij.org>
+
+	build: Change the default for --with-libtool-modification.
+	+ commit 2c4551c0c405a736e1b3953b2a58ec5104c52083
+	* configure.ac (--with-libtool-modification): default=never.
+
+2023-08-16  NIIBE Yutaka  <gniibe@fsij.org>
+
+	build: New configure option --with-libtool-modification.
+	+ commit e0a46b490926879b5519e2e8dfb97226ec024817
+	* Makefile.am (EXTRA_DIST): Add build-aux/libtool-patch.sed.
+	* build-aux/libtool-patch.sed: New.
+	* configure.ac (--with-libtool-modification): New.
+	* build-aux/ltmain.sh: Revert our own local modification.
+
+2023-06-19  Werner Koch  <wk@gnupg.org>
+
+	Release 1.6.4.
+	+ commit 557999424ebd13e70d6fc17e648a5dd2a06f440b
+
+
+	Correctly detect write errors while creating CMS objects.
+	+ commit 9ced7706f2738128aa5068727ea348c44f42e16e
+	* src/cms.c (write_encrypted_cont): Take care of write errors.
+
+2023-05-16  NIIBE Yutaka  <gniibe@fsij.org>
+
+	build: Sync libtool from libgpg-error for 64-bit Windows.
+	+ commit a920c2ff1a723031e8c6b8b61632bad46a740c83
+	* build-aux/ltmain.hs: Update from libgpg-error.
+
+2023-05-12  NIIBE Yutaka  <gniibe@fsij.org>
+
+	tests: Use -no-fast-install LDFLAGS for Windows.
+	+ commit 74fb95dbaf70d97b67793b29497b1e7b29a5e2f1
+	* tests/Makefile.am [HAVE_W32_SYSTEM] (AM_LDFLAGS): Conditionalize.
+
+2023-04-05  NIIBE Yutaka  <gniibe@fsij.org>
+
+	build: Update gpg-error.m4.
+	+ commit 53b9fa1d58ba522ca0eea4fe460719722e6e1ef5
+	* m4/gpg-error.m4: Update from libgpg-error master.
+
 2022-12-06  Werner Koch  <wk@gnupg.org>
 
 	Release 1.6.3.

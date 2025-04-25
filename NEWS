@@ -1,3 +1,38 @@
+Noteworthy changes in version 1.6.7 (2024-06-21) [C22/A14/R7]
+------------------------------------------------
+
+ * Allow for an empty Subject in certs.  [T7171]
+
+ Release-info: https://dev.gnupg.org/T7173
+
+
+Noteworthy changes in version 1.6.6 (2024-02-23) [C22/A14/R6]
+------------------------------------------------
+
+ * Fix a possible wrong error return from the DER builder.  [T6992]
+
+ Release-info: https://dev.gnupg.org/T7009
+
+
+Noteworthy changes in version 1.6.5 (2023-11-16) [C22/A14/R5]
+------------------------------------------------
+
+ * Add Brainpool curve detection using parameters with compressed base
+   point.  [rKeb23f853f178]
+
+ * New configure option --with-libtool-modification.  [T6619]
+
+ Release-info: https://dev.gnupg.org/T6822
+
+
+Noteworthy changes in version 1.6.4 (2023-06-19) [C22/A14/R4]
+------------------------------------------------
+
+ * Correctly detect CMS write errors.  [rK9ced7706f2]
+
+ Release-info: https://dev.gnupg.org/T6543
+
+
 Noteworthy changes in version 1.6.3 (2022-12-06) [C22/A14/R3]
 ------------------------------------------------
 

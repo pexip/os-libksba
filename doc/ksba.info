@@ -1,4 +1,4 @@
-This is ksba.info, produced by makeinfo version 6.5 from ksba.texi.
+This is ksba.info, produced by makeinfo version 6.8 from ksba.texi.
 
 INFO-DIR-SECTION GNU libraries
 START-INFO-DIR-ENTRY
@@ -8,8 +8,8 @@ END-INFO-DIR-ENTRY
 This file documents the KSBA library to access X.509 and CMS data
 structures.
 
-   This is edition 1.6.3, last updated 22 November 2022, of 'The KSBA
-Reference Manual', for Version 1.6.3.
+   This is edition 1.6.7, last updated 22 November 2023, of 'The KSBA
+Reference Manual', for Version 1.6.7.
 
    Copyright (C) 2002, 2003, 2004 g10 Code GmbH
 
@@ -25,8 +25,8 @@ File: ksba.info,  Node: Top,  Next: Introduction,  Up: (dir)
 Main Menu
 *********
 
-This is edition 1.6.3, last updated 22 November 2022, of 'The KSBA
-Reference Manual', for Version 1.6.3 of the KSBA library.
+This is edition 1.6.7, last updated 22 November 2023, of 'The KSBA
+Reference Manual', for Version 1.6.7 of the KSBA library.
 
    Copyright (C) 2002, 2003, 2004 g10 Code GmbH
 
@@ -318,7 +318,7 @@ copy it and eventually destroy it.
      Read the next certificate from the READER object and store it in
      the certificate object CERT for future access.  The certificate is
      parsed and rejected if it has any syntactical or semantical error
-     (i.e.  does not match the ASN.1 description).
+     (i.e., does not match the ASN.1 description).
 
      The function returns '0' if the operation was successfully
      performed.  An error code is returned on failure.
@@ -467,7 +467,7 @@ certificate object has not yet been initialized by means of
      represent any time since the year 0.
 
      It is implemented as a buffer of 16 bytes and may be handled like a
-     standard string.  It should be initialized to zero (i.e.  the first
+     standard string.  It should be initialized to zero (i.e., the first
      byte needs to be 0x00) if it does not hold a valid date.  Date
      values themselves are stored in ISO format and assumed to be
      referenced from UTC. The string with the date value is always
@@ -499,7 +499,7 @@ certificate object has not yet been initialized by means of
           (ksba_cert_t CERT, int WHAT, ksba_isotime_t TIMEBUF)
 
      Return the validity dates from the certificate.  If no value is
-     available an empty date object (i.e.  a 'strlen' will be stored at
+     available an empty date object (i.e., a 'strlen' will be stored at
      TIMEBUF, otherwise it will receive the date.  On failure an error
      code is returned.
 
@@ -669,7 +669,7 @@ mechanism for this by means of two functions:
      will be replaced by the new data.  Using 'NULL' for DATA will
      effectively delete the data.
 
-     On error (i.e.  out of memory) an already existing data object
+     On error (i.e., out of memory) an already existing data object
      stored under KEY may get deleted.
 
      *Caution:* This function is definitely not thread safe because we
@@ -767,7 +767,7 @@ KSBA includes a versatile CMS parser for encryption (enveloped data) and
 digital signing.  The parser is capable of handling arbitrary amounts of
 data without requiring much memory.  Well, certain objects are build in
 memory because it can be assumed that those objects are limited in size;
-e.g.  it does not make sense to use a video clip as the DN despite the
+e.g., it does not make sense to use a video clip as the DN despite the
 fact that the standard does not forbid it.
 
  -- Function: gpg_error_t ksba_cms_parse
@@ -1020,7 +1020,7 @@ have to do it like this:
        if (gpg_err_code (err) == GPG_ERR_EOF)
          okay = 1;
 
-   The only exception is that success (i.e.  no error) is defined to be
+   The only exception is that success (i.e., no error) is defined to be
 '0'; thus you may directly test for success like:
 
        if (!ksba_foo ())
@@ -1051,7 +1051,7 @@ UID            userid               0.9.2342.19200300.100.1.1
 representation; components not listed in this table will be represented
 by their OID.
 
-   For the other direction, i.e.  creating a DN from the string
+   For the other direction, i.e., creating a DN from the string
 representation, KSBA recognizes the following extra labels:
 
 Label          Component            OID
@@ -1797,46 +1797,46 @@ Function and Data Index
 * Menu:
 
 * ksba_cert_get_authority_info_access:   Retrieving attributes.
-                                                              (line 279)
+                                                              (line 277)
 * ksba_cert_get_auth_key_id:             Retrieving attributes.
-                                                              (line 270)
+                                                              (line 268)
 * ksba_cert_get_cert_policies:           Retrieving attributes.
-                                                              (line 232)
+                                                              (line 230)
 * ksba_cert_get_crl_dist_point:          Retrieving attributes.
-                                                              (line 242)
+                                                              (line 240)
 * ksba_cert_get_digest_algo:             Retrieving attributes.
-                                                              (line  41)
+                                                              (line  39)
 * ksba_cert_get_extension:               Retrieving attributes.
-                                                              (line 180)
+                                                              (line 178)
 * ksba_cert_get_ext_key_usages:          Retrieving attributes.
-                                                              (line 226)
+                                                              (line 224)
 * ksba_cert_get_image:                   Retrieving attributes.
                                                               (line  11)
 * ksba_cert_get_issuer:                  Retrieving attributes.
-                                                              (line  73)
+                                                              (line  71)
 * ksba_cert_get_key_usage:               Retrieving attributes.
-                                                              (line 193)
+                                                              (line 191)
 * ksba_cert_get_public_key:              Retrieving attributes.
-                                                              (line 172)
+                                                              (line 170)
 * ksba_cert_get_serial:                  Retrieving attributes.
-                                                              (line  66)
+                                                              (line  64)
 * ksba_cert_get_sig_val:                 Retrieving attributes.
-                                                              (line 176)
+                                                              (line 174)
 * ksba_cert_get_subject:                 Retrieving attributes.
-                                                              (line 100)
+                                                              (line  98)
 * ksba_cert_get_subject_info_access:     Retrieving attributes.
-                                                              (line 293)
+                                                              (line 291)
 * ksba_cert_get_subj_key_id:             Retrieving attributes.
-                                                              (line 261)
+                                                              (line 259)
 * ksba_cert_get_user_data:               User data.           (line  26)
 * ksba_cert_get_validity:                Retrieving attributes.
-                                                              (line 161)
+                                                              (line 159)
 * ksba_cert_hash:                        Retrieving attributes.
-                                                              (line  25)
+                                                              (line  24)
 * ksba_cert_init_from_mem:               Creating certificates.
                                                               (line  41)
 * ksba_cert_is_ca:                       Retrieving attributes.
-                                                              (line 185)
+                                                              (line 183)
 * ksba_cert_new:                         Creating certificates.
                                                               (line   9)
 * ksba_cert_read_der:                    Creating certificates.
@@ -1859,7 +1859,7 @@ Function and Data Index
 * ksba_content_t:                        CMS Parser.          (line  61)
 * ksba_dn_teststr:                       DNs.                 (line   9)
 * ksba_isotime_t:                        Retrieving attributes.
-                                                              (line 125)
+                                                              (line 123)
 * ksba_name_enum:                        Names.               (line  17)
 * ksba_name_get_uri:                     Names.               (line  36)
 * ksba_name_release:                     Names.               (line  13)
@@ -1901,3 +1901,8 @@ Node: Concept Index80669
 Node: Function and Data Index80797
 
 End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:
