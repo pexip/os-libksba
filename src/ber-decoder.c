@@ -748,6 +748,18 @@ match_der (AsnNode root, const struct tag_info *ti,
                   fprintf (stderr, "  choice match <"); dump_tlv (ti, stderr);
                   fprintf (stderr, ">\n");
                 }
+              if (ti->class == CLASS_UNIVERSAL && ti->tag == TYPE_SEQUENCE
+                  && !ti->ndef && ti->length == 0
+                  && ds->cur.node->name
+                  && !strcmp (ds->cur.node->name, "subject"))
+                {
+                  /* 'Subject' is empty.  */
+                  if (debug)
+                    fprintf (stderr, "  empty subject hack\n");
+                  ds->cur.next_tag = 1;
+                  return 5;
+                }
+
               /* mark the remaining as done */
               for (node=node->right; node; node = node->right)
                   node->flags.skip_this = 1;
@@ -883,7 +895,7 @@ decoder_next (BerDecoder d)
            * also clear the buffer because there is no guarantee that
            * we will copy data to all bytes of the buffer: A broken
            * ASN.1 encoding may thus lead to access of uninitialized
-           * data even if we make sure that that access is not our of
+           * data even if we make sure that that access is not out of
            * bounds. */
           d->image.used = 0;
           d->image.length = ti.length + 100;

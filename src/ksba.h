@@ -1,6 +1,5 @@
 /* ksba.h - X.509 library used by GnuPG
- * Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2010, 2011
- *               2012, 2013, 2104, 2015, 2019, 2020, 2021 g10 Code GmbH
+ * Copyright (C) 2001-2006, 2010-2015, 2018-2023 g10 Code GmbH
  *
  * This file is part of KSBA.
  *
@@ -46,11 +45,11 @@ extern "C" {
 /* The version of this header should match the one of the library.  Do
  * not use this symbol in your application; use assuan_check_version
  * instead.  */
-#define KSBA_VERSION "1.6.3"
+#define KSBA_VERSION "1.6.7"
 
 /* The version number of this header.  It may be used to handle minor
  * API incompatibilities.  */
-#define KSBA_VERSION_NUMBER 0x010603
+#define KSBA_VERSION_NUMBER 0x010607
 
 
 

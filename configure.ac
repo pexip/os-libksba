@@ -30,7 +30,7 @@ min_automake_version="1.14"
 m4_define([mym4_package],[libksba])
 m4_define([mym4_major], [1])
 m4_define([mym4_minor], [6])
-m4_define([mym4_micro], [3])
+m4_define([mym4_micro], [7])
 
 # Below is m4 magic to extract and compute the git revision number,
 # the decimalized short revision number, a beta version string and a
@@ -52,7 +52,7 @@ AC_INIT([mym4_package],[mym4_version],[https://bugs.gnupg.org])
 # Please remember to document interface changes in the NEWS file.
 LIBKSBA_LT_CURRENT=22
 LIBKSBA_LT_AGE=14
-LIBKSBA_LT_REVISION=3
+LIBKSBA_LT_REVISION=7
 #-------------------
 # If the API is changed in an incompatible way: increment the next counter.
 KSBA_CONFIG_API_VERSION=1
@@ -70,6 +70,7 @@ AC_CANONICAL_HOST
 AB_INIT
 
 AC_USE_SYSTEM_EXTENSIONS
+AC_ARG_VAR(SYSROOT,[locate config scripts also below that directory])
 
 # Taken from mpfr-4.0.1, then modified for LDADD_FOR_TESTS_KLUDGE
 dnl Under Linux, make sure that the old dtags are used if LD_LIBRARY_PATH
@@ -161,16 +162,6 @@ gl_EARLY
 #AC_ARG_PROGRAM
 AC_PROG_YACC
 AX_PROG_BISON([have_bison=yes],[have_bison=no])
-
-if test "$USE_MAINTAINER_MODE" = "yes"; then
-	AC_CHECK_PROGS(GCOV, [gcov], gcov)
-	# gcov coverage reporting
-	AC_TDD_GCOV
-	AC_SUBST(COVERAGE_CFLAGS)
-	AC_SUBST(COVERAGE_LDFLAGS)
-else
-	AM_CONDITIONAL(HAVE_GCOV, false)
-fi
 
 AC_C_INLINE
 
@@ -267,12 +258,8 @@ case "${host}" in
 esac
 if test "$have_w32_system" = yes; then
    AC_DEFINE(HAVE_W32_SYSTEM,1, [Defined if we run on a W32 API based system])
-   if test "$have_w32ce_system" = yes; then
-     AC_DEFINE(HAVE_W32CE_SYSTEM,1,[Defined if we run on WindowsCE])
-   fi
 fi
 AM_CONDITIONAL(HAVE_W32_SYSTEM, test "$have_w32_system" = yes)
-AM_CONDITIONAL(HAVE_W32CE_SYSTEM, test "$have_w32ce_system" = yes)
 
 
 # For some systems we know that we have ld_version scripts.
@@ -294,6 +281,43 @@ AC_ARG_ENABLE([ld-version-script],
               [ : ] )
 AM_CONDITIONAL(HAVE_LD_VERSION_SCRIPT, test "$have_ld_version_script" = "yes")
 
+#
+# Specify how we support our local modification of libtool for Windows
+# 64-bit.  Options are:
+#
+# (1) apply: when appying patch fails, it results failure of entire build
+# (2) never: never apply the patch (no try)
+# (3) try: use patched if it goes well, use original if fails
+#
+AC_ARG_WITH([libtool-modification],
+  AS_HELP_STRING([--with-libtool-modification=apply|never|try],
+                 [how to handle libtool modification (default=never)]),
+                 build_libtool_modification=$withval,
+                 build_libtool_modification=never)
+
+#
+# Apply a patch (locally maintained one of ours) to libtool
+#
+case $host in
+  x86_64-*mingw32*)
+AC_CONFIG_COMMANDS([libtool-patch],[[
+  if test "$build_selection" = never; then
+    echo "patch not applied"
+  elif (mv -f libtool libtool.orig; \
+        sed -f $srcdir/build-aux/libtool-patch.sed libtool.orig >libtool); then
+    echo "applied successfully"
+  elif test "$build_selection" = try; then
+    mv -f libtool.orig libtool
+    echo "patch failed, thus, using original"
+  else
+    echo "patch failed"
+    as_fn_exit 1
+  fi
+]],[build_selection=$build_libtool_modification])
+  ;;
+  *)
+  ;;
+esac
 
 #
 # Check for ELF visibility support.
